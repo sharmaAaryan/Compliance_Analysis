@@ -7,6 +7,12 @@ import RuleAndPolicies from "./pages/RuleAndPolicies";
 import ComplianceEngine from "./pages/ComplianceEngine";
 import Reports from "./pages/Reports";
 import Signup from "./pages/auth/Signup";
+import Signin from "./pages/auth/Signin";
+import { AuthProvider } from "./context/AuthContext.jsx";
+import { ThemeContextProvider } from "./context/ThemeContext.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import Logout from "./pages/auth/Logout.jsx";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   const router = createBrowserRouter([
@@ -19,35 +25,54 @@ function App() {
           element: <Dashboard />,
         },
         {
-          path: "/organization",
-          element: <Oraganizations />,
-        },
-        {
-          path: "/products",
-          element: <Product />,
-        },
-        {
-          path: "/rules-and-policies",
-          element: <RuleAndPolicies />,
-        },
-        {
-          path: "/compliance-engine",
-          element: <ComplianceEngine />,
-        },
-        {
-          path: "/reports",
-          element: <Reports />,
+          element: <ProtectedRoute />,
+          children: [
+            {
+              path: "/organization",
+              element: <Oraganizations />,
+            },
+            {
+              path: "/products",
+              element: <Product />,
+            },
+            {
+              path: "/rules-and-policies",
+              element: <RuleAndPolicies />,
+            },
+            {
+              path: "/compliance-engine",
+              element: <ComplianceEngine />,
+            },
+            {
+              path: "/reports",
+              element: <Reports />,
+            },
+          ],
         },
         {
           path: "/signup",
           element: <Signup />,
         },
+        {
+          path: "/signin",
+          element: <Signin />,
+        },
+        {
+          path: "/logout",
+          element: <Logout />,
+        },
       ],
     },
   ]);
+
   return (
     <>
-      <RouterProvider router={router} />
+      <AuthProvider>
+        <ThemeContextProvider>
+          <RouterProvider router={router} />
+          <ToastContainer position="top-center" autoClose={3000} />
+        </ThemeContextProvider>
+      </AuthProvider>
     </>
   );
 }

@@ -1,42 +1,39 @@
-import axios from "axios";
+import axios from 'axios';
 
+// Create an axios instance
 const api = axios.create({
-  baseURL: "http://localhost:5000/api",
-  withCredentials: true,
+  baseURL: 'http://localhost:5000/api', // Adjusted to match typical API structure
+  withCredentials: true, // Required for cookies
 });
-
+// Request interceptor
 api.interceptors.request.use(
   (config) => {
     return config;
   },
   (error) => {
     return Promise.reject(error);
-  },
+  }
 );
-
+// Response interceptor
 api.interceptors.response.use(
   (response) => {
-    // ✅ If request is successful, just return response
     return response;
   },
   (error) => {
-    // ❌ Handle errors here
-
+    // Global error handling
     if (error.response) {
-      // You can also show message from backend
-      const message = error.response.data?.message || "Something went wrong";
-      console.error(message);
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      console.error('API Error:', error.response.data.message || error.message);
     } else if (error.request) {
-      // Request was made but no response received
-      console.error("No response from server");
+      // The request was made but no response was received
+      console.error('Network Error: No response received');
     } else {
-      // Something else happened
-      console.error("Error:", error.message);
+      // Something happened in setting up the request that triggered an Error
+      console.error('Error:', error.message);
     }
-
-    // IMPORTANT: Always reject so calling code can handle it too
     return Promise.reject(error);
-  },
+  }
 );
 
 export default api;
