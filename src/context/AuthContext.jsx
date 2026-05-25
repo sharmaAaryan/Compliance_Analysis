@@ -1,47 +1,48 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import api from '../api/api';
-
-export const AuthContext = createContext();
-
-export const useAuth = () => useContext(AuthContext);
-
+import { createContext, useContext, useEffect, useState } from "react";
+import api from "../api/api";
+import { toast } from "react-toastify";
+//  create context:
+const AuthContext = createContext();
+//  create function that provide the context to whole application
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const res = await api.get('/auth/me');
-        setUser(res.data.data || res.data);
-      } catch (error) {
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    checkAuth();
-  }, []);
-
-  const login = async (formData) => {
-    const res = await api.post('/auth/signin', formData);
-    setUser(res.data.data || res.data);
-    return res;
+  const checkAuth = async () => {
+    try {
+      const response = await api.get("/auth/get-users");
+      setUser(response.data);
+    } catch (err) {
+      console.log(err);
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const login = async (credentials) => {
+    const response = await api.post("/auth/signin", credentials);
+    setUser(response.data.data);
+    return response;
   };
 
   const logout = async () => {
-    try {
-      await api.post('/auth/logout');
-    } catch (err) {
-      console.log('Logout error', err);
-    } finally {
-      setUser(null);
-    }
+    await api.post("/auth/signout");
+    setUser(null);
   };
 
+  useEffect(() => {
+    checkAuth();
+  }, []);
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, login, loading, logout, checkAuth }}>
       {children}
     </AuthContext.Provider>
   );
+};
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("context must be initiallized");
+  }
+  return context;
 };
